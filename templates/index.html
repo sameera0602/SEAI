@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Disease AI & LLM Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            max-width: 550px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            background: linear-gradient(90deg, #1e293b, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin: 0;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary);
+            background: rgba(37, 99, 235, 0.03);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .upload-area svg {
+            width: 48px;
+            height: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .upload-area:hover svg {
+            transform: scale(1.1);
+        }
+
+        .upload-area p {
+            margin: 0;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .upload-area span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .image-preview {
+            display: none;
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        #loader {
+            display: none;
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(37, 99, 235, 0.2);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #result-section {
+            display: none;
+            margin-top: 35px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .prediction-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .prediction-badge {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 15px;
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+        }
+
+        .advice-title {
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .advice-title svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        .advice-box {
+            font-size: 14.5px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+        
+        /* Markdown style content support inside advice box */
+        .advice-box p { margin-top: 0; margin-bottom: 1em; }
+        .advice-box p:last-child { margin-bottom: 0; }
+
+        @media (max-width: 600px) {
+            .container { padding: 30px 20px; border-radius: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Skin Disease AI</h1>
+        <p>AI-powered diagnosis & personalized LLM health insights</p>
+    </div>
+
+    <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        <p id="file-name">Click or drag image to upload</p>
+        <span>Supports JPG, PNG</span>
+    </div>
+    <input type="file" id="file-input" accept="image/*">
+    
+    <img id="image-preview" class="image-preview" src="#" alt="Image Preview">
+
+    <button id="analyze-btn" onclick="analyzeImage()" disabled>Analyze Image</button>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="color: var(--text-muted); font-size: 14px; font-weight: 500;">Consulting AI Dermatologist...</p>
+    </div>
+
+    <div id="result-section">
+        <div class="result-card">
+            <div class="prediction-header">
+                <h3>Detected Condition</h3>
+                <span class="prediction-badge" id="pred-class"></span>
+            </div>
+            <div class="advice-content">
+                <div class="advice-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    AI Dermatologist Advice
+                </div>
+                <div class="advice-box" id="llm-advice"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const fileNameDisplay = document.getElementById('file-name');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const dropZone = document.getElementById('drop-zone');
+    const imagePreview = document.getElementById('image-preview');
+
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if(files.length) {
+            fileInput.files = files;
+            handleFileSelect(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        if(e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        fileNameDisplay.textContent = file.name;
+        analyzeBtn.disabled = false;
+        
+        // Hide upload text/icon and show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+            dropZone.querySelector('svg').style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+    }
+
+    async function analyzeImage() {
+        if(fileInput.files.length === 0) return;
+        
+        const formData = new FormData();
+        formData.append('image', fileInput.files[0]);
+
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('result-section').style.display = 'none';
+        analyzeBtn.disabled = true;
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            
+            if (!response.ok) throw new Error(data.error || 'Server error');
+            
+            document.getElementById('pred-class').textContent = data.prediction;
+            
+            // Basic formatting for LLM response (newlines to <br> if needed, though usually Gemini returns plain text with paragraphs)
+            const formattedAdvice = data.advice.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+            document.getElementById('llm-advice').innerHTML = `<p>${formattedAdvice}</p>`;
+            
+            document.getElementById('result-section').style.display = 'block';
+        } catch (error) {
+            alert('Error connecting to the API: ' + error.message);
+        } finally {
+            document.getElementById('loader').style.display = 'none';
+            analyzeBtn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>

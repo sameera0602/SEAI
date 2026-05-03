@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+env/
+ENV/
+
+# Terminal / Screenshot generation tools
+generate_terminal_screenshots.py
+capture.py
+embed_icon.py
+extract_icon.ps1
+cmd_icon.png
+mock_skin.jpg
+terminal_build_push.png
+*.png
+
+# Exclude Attachments directory
+Attachments/
+
+# Exclude uploads directory
+uploads/
+
+# OS generated files
+.DS_Store
+Thumbs.db
